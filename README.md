@@ -17,7 +17,7 @@ import (
 
 func main() {
 	filter := sensitive.New()
-	filter.LoadWordDict("dict.txt")
+	filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("长者")
 
 	fmt.Println(filter.Filter("我为长者续一秒")) // 我为续一秒

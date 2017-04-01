@@ -1,4 +1,4 @@
-# Sentitive
+# Sensitive
 
 敏感词过滤
 

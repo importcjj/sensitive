@@ -27,3 +27,12 @@ func TestAddWord(t *testing.T) {
 	fmt.Println(filter.FindIn("我为长者续一秒"))
 	fmt.Println(filter.FindIn("我为长 者续一秒"))
 }
+
+func TestAddWord2(t *testing.T) {
+	filter := New()
+
+	filter.AddWord("习近平下台")
+	fmt.Println(filter.Filter("2习近平下台2"))
+	fmt.Println(filter.FindIn("2习近平下台2"))
+	fmt.Println(filter.Replace("2习近平下台2", 42))
+}

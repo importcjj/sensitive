@@ -1,5 +1,9 @@
 package sensitive
 
+// import (
+// 	"fmt"
+// )
+
 // Trie 短语组成的Trie树.
 type Trie struct {
 	Root *Node
@@ -56,6 +60,7 @@ func (tree *Trie) Replace(text string, character rune) string {
 		r := runes[position]
 		next, ok := node.Children[r]
 		parent = node
+
 		if !ok {
 			if !node.IsRootNode() {
 				if wordLength > 0 {
@@ -65,7 +70,7 @@ func (tree *Trie) Replace(text string, character rune) string {
 						}
 					}
 				}
-				position--
+				position -= wordLength
 			}
 			node = tree.Root
 			wordLength = 0
@@ -98,13 +103,12 @@ func (tree *Trie) Filter(text string) string {
 		parent = node
 		if !ok {
 			if !node.IsRootNode() {
-				if wordLength > 0 {
-					if !parent.IsPathEnd() {
-						result = append(result, runes[position-wordLength:position]...)
-					}
+				if wordLength > 0 && !parent.IsPathEnd() {
+					position -= wordLength
+				} else {
+					position--
 				}
 				node = tree.Root
-				position--
 			} else {
 				result = append(result, r)
 				node = tree.Root
@@ -123,27 +127,34 @@ func (tree *Trie) Filter(text string) string {
 // FindIn 判断text中是否含有词库中的词
 func (tree *Trie) FindIn(text string) (bool, string) {
 	var node = tree.Root
+	var parent = tree.Root
 	var runes = []rune(text)
 	var wordLength int
 	var word string
 	for position := 0; position < len(runes); position++ {
 		r := runes[position]
-		if next, ok := node.Children[r]; ok {
-			wordLength++
-			node = next
-			if node.IsPathEnd() {
-				word = string(runes[position-wordLength+1 : position+1])
-				return true, word
+		next, ok := node.Children[r]
+		parent = node
+		if !ok {
+			if !node.IsRootNode() {
+				if wordLength > 0 && parent.IsPathEnd() {
+					return true, string(runes[position-wordLength : position])
+				}
+
+				node = tree.Root
+				position -= wordLength
+			} else {
+				node = tree.Root
 			}
+			wordLength = 0
 			continue
 		}
-		wordLength = 0
-		// 如果当前字符无匹配且当前节点非根节点
-		// 则让改字符从头再匹配一次
-		if !node.IsRootNode() {
-			position--
+		if next.IsPathEnd() {
+			return true, string(runes[position-wordLength : position+1])
 		}
-		node = tree.Root
+
+		wordLength++
+		node = next
 	}
 	return false, word
 }
@@ -175,7 +186,7 @@ func (node *Node) IsRootNode() bool {
 	return node.isRootNode
 }
 
-// IsPathEnd 判断是否为某个路劲的结束
+// IsPathEnd 判断是否为某个路径的结束
 func (node *Node) IsPathEnd() bool {
 	return node.isPathEnd
 }

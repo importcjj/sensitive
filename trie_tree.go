@@ -77,7 +77,7 @@ func (tree *Trie) Replace(text string, character rune) string {
 			continue
 		}
 
-		if position == len(runes)-1 {
+		if position == len(runes)-1 && next.IsPathEnd() {
 			for i := position - wordLength; i <= position; i++ {
 				runes[i] = character
 			}

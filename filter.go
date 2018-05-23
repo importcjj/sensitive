@@ -52,7 +52,7 @@ func (filter *Filter) Replace(text string, repl rune) string {
 }
 
 // FindIn 检测敏感词
-func (filter *Filter) FindIn(text string) (bool, string) {
+func (filter *Filter) FindIn(text string) (bool, []string) {
 	text = filter.RemoveNoise(text)
 	return filter.trie.FindIn(text)
 }

@@ -101,62 +101,84 @@ func (tree *Trie) Filter(text string) string {
 		r := runes[position]
 		next, ok := node.Children[r]
 		parent = node
-		if !ok {
-			if !node.IsRootNode() {
-				if wordLength > 0 && !parent.IsPathEnd() {
-					position -= wordLength
-				} else {
-					position--
+
+		if ok {
+			node = next
+			wordLength++
+			if position == len(runes)-1 {
+				if !next.IsPathEnd() {
+					result = append(result, runes[position])
 				}
-				node = tree.Root
-			} else {
+			}
+		} else {
+			if node.IsRootNode() {
 				result = append(result, r)
 				node = tree.Root
+				wordLength = 0
+				continue
 			}
-			wordLength = 0
-			continue
-		}
 
-		wordLength++
-		node = next
+			if parent.IsPathEnd() {
+				position--
+				node = tree.Root
+				wordLength = 0
+				continue
+			}
+
+			result = append(result, runes[position-wordLength:position]...)
+			wordLength = 0
+			position--
+			node = tree.Root
+		}
 	}
 
 	return string(result)
 }
 
 // FindIn 判断text中是否含有词库中的词
-func (tree *Trie) FindIn(text string) (bool, string) {
+func (tree *Trie) FindIn(text string) (bool, []string) {
 	var node = tree.Root
 	var parent = tree.Root
 	var runes = []rune(text)
-	var wordLength int
-	var word string
+	// var wordLength int
+	var beginPos int
+
+	result := make([]string, 0)
 	for position := 0; position < len(runes); position++ {
 		r := runes[position]
 		next, ok := node.Children[r]
 		parent = node
-		if !ok {
-			if !node.IsRootNode() {
-				if wordLength > 0 && parent.IsPathEnd() {
-					return true, string(runes[position-wordLength : position])
-				}
 
-				node = tree.Root
-				position -= wordLength
-			} else {
-				node = tree.Root
+		if ok {
+			if beginPos == 0 {
+				beginPos = position
 			}
-			wordLength = 0
-			continue
-		}
-		if next.IsPathEnd() {
-			return true, string(runes[position-wordLength : position+1])
-		}
 
-		wordLength++
-		node = next
+			if position == len(runes)-1 && next.IsPathEnd() {
+				result = append(result, string(runes[beginPos:position+1]))
+			}
+
+			node = next
+
+		} else {
+			if parent.IsPathEnd() {
+				result = append(result, string(runes[beginPos:position]))
+
+				node = tree.Root
+				position = beginPos
+				beginPos = 0
+				continue
+
+			}
+			if beginPos != 0 {
+				position = beginPos
+			}
+			beginPos = 0
+			node = tree.Root
+		}
 	}
-	return false, word
+
+	return len(result) != 0, result
 }
 
 // NewNode 新建子节点

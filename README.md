@@ -1,6 +1,6 @@
 # Sensitive
 
-敏感词过滤
+敏感词过滤 [![Build Status](https://travis-ci.org/importcjj/sensitive.svg?branch=master)](https://travis-ci.org/importcjj/sensitive)
 
 #
 

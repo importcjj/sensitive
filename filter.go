@@ -16,7 +16,7 @@ type Filter struct {
 func New() *Filter {
 	return &Filter{
 		trie:  NewTrie(),
-		noise: regexp.MustCompile(`[\s&%$@*]+`),
+		noise: regexp.MustCompile(`[\|\s&%$@*]+`),
 	}
 }
 
@@ -31,6 +31,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 	if err != nil {
 		return err
 	}
+
 	words := strings.Split(string(content), "\n")
 	filter.trie.Add(words...)
 	return nil
@@ -55,6 +56,12 @@ func (filter *Filter) Replace(text string, repl rune) string {
 func (filter *Filter) FindIn(text string) (bool, string) {
 	text = filter.RemoveNoise(text)
 	return filter.trie.FindIn(text)
+}
+
+// Validate 检测字符串是否合法
+func (filter *Filter) Validate(text string) (bool, string) {
+	text = filter.RemoveNoise(text)
+	return filter.trie.Validate(text)
 }
 
 // RemoveNoise 去除空格等噪音

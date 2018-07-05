@@ -1,38 +1,91 @@
 package sensitive
 
 import (
-	"fmt"
 	"testing"
 )
 
-func TestFilter(t *testing.T) {
+func TestSensitiveFilter(t *testing.T) {
 	filter := New()
-	if err := filter.LoadWordDict("dict/dict.txt"); err != nil {
-		t.Error(err)
+	filter.LoadWordDict("../dict/dict.txt")
+	filter.AddWord("有一个东西")
+	filter.AddWord("一个东西")
+	filter.AddWord("一个")
+	filter.AddWord("东西")
+	filter.AddWord("个东")
+
+	testcases := []struct {
+		Text   string
+		Expect string
+	}{
+		{"我有一个东东西", "我有东"},
+		{"我有一个东西", "我"},
+		{"一个东西", ""},
+		{"两个东西", "两西"},
+		{"一个物体", "物体"},
 	}
 
-	fmt.Println(filter.Filter("我是共产党p骚宝马娱乐城"))
-	fmt.Println(filter.Replace("我是共产党p骚宝马娱乐城", 42))
-	fmt.Println(filter.FindIn("我是共 产 党p骚 宝马 娱乐城"))
+	for _, tc := range testcases {
+		if got := filter.Filter(tc.Text); got != tc.Expect {
+			t.Fatalf("filter %s, got %s, expect %s", tc.Text, got, tc.Expect)
+		}
+	}
+
 }
 
-func TestAddWord(t *testing.T) {
+func TestSensitiveValidate(t *testing.T) {
 	filter := New()
-	filter.LoadWordDict("path/to/dict.txt")
-	filter.AddWord("长者")
+	filter.LoadWordDict("../dict/dict.txt")
+	filter.AddWord("有一个东西")
+	filter.AddWord("一个东西")
+	filter.AddWord("一个")
+	filter.AddWord("东西")
+	filter.AddWord("个东")
 
-	fmt.Println(filter.Filter("我为长者续一秒"))
-	// 42 即 "*"
-	fmt.Println(filter.Replace("我为长者续一秒", 42))
-	fmt.Println(filter.FindIn("我为长者续一秒"))
-	fmt.Println(filter.FindIn("我为长 者续一秒"))
+	testcases := []struct {
+		Text        string
+		ExpectPass  bool
+		ExpectFirst string
+	}{
+		{"我有一@ |个东东西", false, "一个"},
+		{"我有一个东东西", false, "一个"},
+		{"我有一个东西", false, "有一个东西"},
+		{"一个东西", false, "一个"},
+		{"两个东西", false, "个东"},
+		{"一样东西", false, "东西"},
+	}
+
+	for _, tc := range testcases {
+		if pass, first := filter.Validate(tc.Text); pass != tc.ExpectPass || first != tc.ExpectFirst {
+			t.Fatalf("validate %s, got %v, %s, expect %v, %s", tc.Text, pass, first, tc.ExpectPass, tc.ExpectFirst)
+		}
+	}
+
 }
 
-func TestAddWord2(t *testing.T) {
+func TestSensitiveReplace(t *testing.T) {
 	filter := New()
+	filter.LoadWordDict("../dict/dict.txt")
+	filter.AddWord("有一个东西")
+	filter.AddWord("一个东西")
+	filter.AddWord("一个")
+	filter.AddWord("东西")
+	filter.AddWord("个东")
 
-	filter.AddWord("习近平下台")
-	fmt.Println(filter.Filter("2习近平下台2"))
-	fmt.Println(filter.FindIn("2习近平下台2"))
-	fmt.Println(filter.Replace("2习近平下台2", 42))
+	testcases := []struct {
+		Text   string
+		Expect string
+	}{
+		{"我有一个东东西", "我有**东**"},
+		{"我有一个东西", "我*****"},
+		{"一个东西", "****"},
+		{"两个东西", "两**西"},
+		{"一个物体", "**物体"},
+	}
+
+	for _, tc := range testcases {
+		if got := filter.Replace(tc.Text, 42); got != tc.Expect {
+			t.Fatalf("replace %s, got %s, expect %s", tc.Text, got, tc.Expect)
+		}
+	}
+
 }

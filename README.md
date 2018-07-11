@@ -1,6 +1,8 @@
 # Sensitive
+[![Build Status](https://travis-ci.org/importcjj/sensitive.svg?branch=master)](https://travis-ci.org/importcjj/sensitive)
 
-敏感词过滤 [![Build Status](https://travis-ci.org/importcjj/sensitive.svg?branch=master)](https://travis-ci.org/importcjj/sensitive)
+
+敏感词查找,验证,过滤和替换 🤓 FindAll, Validate, Filter and Replace words. 
 
 #
 

@@ -58,6 +58,11 @@ func (filter *Filter) FindIn(text string) (bool, string) {
 	return filter.trie.FindIn(text)
 }
 
+// FindAll 找到所有匹配词
+func (filter *Filter) FindAll(text string) []string {
+	return filter.trie.FindAll(text)
+}
+
 // Validate 检测字符串是否合法
 func (filter *Filter) Validate(text string) (bool, string) {
 	text = filter.RemoveNoise(text)

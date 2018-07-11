@@ -1,12 +1,13 @@
 package sensitive
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestSensitiveFilter(t *testing.T) {
 	filter := New()
-	filter.LoadWordDict("../dict/dict.txt")
+	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -34,7 +35,7 @@ func TestSensitiveFilter(t *testing.T) {
 
 func TestSensitiveValidate(t *testing.T) {
 	filter := New()
-	filter.LoadWordDict("../dict/dict.txt")
+	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -64,7 +65,7 @@ func TestSensitiveValidate(t *testing.T) {
 
 func TestSensitiveReplace(t *testing.T) {
 	filter := New()
-	filter.LoadWordDict("../dict/dict.txt")
+	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -88,4 +89,31 @@ func TestSensitiveReplace(t *testing.T) {
 		}
 	}
 
+}
+
+func TestSensitiveFindAll(t *testing.T) {
+	filter := New()
+	// filter.LoadWordDict("../dict/dict.txt")
+	filter.AddWord("有一个东西")
+	filter.AddWord("一个东西")
+	filter.AddWord("一个")
+	filter.AddWord("东西")
+	filter.AddWord("个东")
+
+	testcases := []struct {
+		Text   string
+		Expect []string
+	}{
+		{"我有一个东东西", []string{"一个", "个东", "东西"}},
+		{"我有一个东西", []string{"有一个东西", "一个", "一个东西", "个东", "东西"}},
+		{"一个东西", []string{"一个", "一个东西", "个东", "东西"}},
+		{"两个东西", []string{"个东", "东西"}},
+		{"一个物体", []string{"一个"}},
+	}
+
+	for _, tc := range testcases {
+		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(tc.Expect, got) {
+			t.Fatalf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
+		}
+	}
 }

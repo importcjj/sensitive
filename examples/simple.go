@@ -13,6 +13,13 @@ func main() {
 	filter.AddWord("个")
 	filter.AddWord("有一")
 	filter.AddWord("一个")
+	filter.AddWord("有一个东西")
+	filter.AddWord("有一个")
+	filter.AddWord("东西")
+	filter.AddWord("个东")
+	filter.AddWord("哈哈")
+
+	fmt.Println(filter.FindAll("有一个东西东西哈哈"))
 
 	fmt.Println(filter.Replace("hello", 42))
 	fmt.Println(filter.Replace("骚", 42))
@@ -49,5 +56,4 @@ func main() {
 	fmt.Println("有一个啊", filter.Filter("有一个啊"))
 	fmt.Println("有一个", filter.Filter("有一个"))
 	fmt.Println("有一", filter.Filter("有一"))
-
 }

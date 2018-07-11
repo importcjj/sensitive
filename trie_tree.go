@@ -150,6 +150,60 @@ func (tree *Trie) FindIn(text string) (bool, string) {
 	return tree.Validate(text)
 }
 
+// FindAll 找有所有包含在词库中的词
+func (tree *Trie) FindAll(text string) []string {
+	var matches []string
+	var (
+		parent  = tree.Root
+		current *Node
+		runes   = []rune(text)
+		length  = len(runes)
+		left    = 0
+		found   bool
+	)
+
+	for position := 0; position < length; position++ {
+		current, found = parent.Children[runes[position]]
+
+		if !found {
+			parent = tree.Root
+			position = left
+			left++
+			continue
+		}
+
+		if current.IsPathEnd() && left < position {
+			matches = append(matches, string(runes[left:position+1]))
+
+			if position == length-1 {
+				parent = tree.Root
+				position = left
+				left++
+				continue
+			}
+		}
+
+		parent = current
+	}
+
+	if count := len(matches); count > 0 {
+		set := make(map[string]struct{})
+		for i := range matches {
+			_, ok := set[matches[i]]
+			if !ok {
+				set[matches[i]] = struct{}{}
+				continue
+			}
+			count--
+			copy(matches[i:], matches[i+1:])
+			i--
+		}
+		return matches[:count]
+	}
+
+	return nil
+}
+
 // NewNode 新建子节点
 func NewNode(character rune) *Node {
 	return &Node{

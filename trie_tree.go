@@ -147,7 +147,8 @@ func (tree *Trie) Validate(text string) (bool, string) {
 
 // FindIn 判断text中是否含有词库中的词
 func (tree *Trie) FindIn(text string) (bool, string) {
-	return tree.Validate(text)
+	validated, first := tree.Validate(text)
+	return !validated, first
 }
 
 // FindAll 找有所有包含在词库中的词

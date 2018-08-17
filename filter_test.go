@@ -32,6 +32,25 @@ func TestSensitiveFilter(t *testing.T) {
 	}
 
 }
+func TestSensitiveValidateSingleword(t *testing.T) {
+	filter := New()
+	filter.AddWord("东")
+
+	testcases := []struct {
+		Text        string
+		ExpectPass  bool
+		ExpectFirst string
+	}{
+		{"两个东西", false, "东"},
+	}
+
+	for _, tc := range testcases {
+		if pass, first := filter.Validate(tc.Text); pass != tc.ExpectPass || first != tc.ExpectFirst {
+			t.Fatalf("validate %s, got %v, %s, expect %v, %s", tc.Text, pass, first, tc.ExpectPass, tc.ExpectFirst)
+		}
+	}
+
+}
 
 func TestSensitiveValidate(t *testing.T) {
 	filter := New()
@@ -41,6 +60,10 @@ func TestSensitiveValidate(t *testing.T) {
 	filter.AddWord("一个")
 	filter.AddWord("东西")
 	filter.AddWord("个东")
+	filter.AddWord("有一个东西")
+	filter.AddWord("一个东西")
+	filter.AddWord("一个")
+	filter.AddWord("东西")
 
 	testcases := []struct {
 		Text        string
@@ -116,4 +139,23 @@ func TestSensitiveFindAll(t *testing.T) {
 			t.Fatalf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
 		}
 	}
+}
+
+func TestSensitiveFindallSingleword(t *testing.T) {
+	filter := New()
+	filter.AddWord("东")
+
+	testcases := []struct {
+		Text   string
+		Expect []string
+	}{
+		{"两个东西", []string{"东"}},
+	}
+
+	for _, tc := range testcases {
+		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(tc.Expect, got) {
+			t.Fatalf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
+		}
+	}
+
 }

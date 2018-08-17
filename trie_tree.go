@@ -135,7 +135,7 @@ func (tree *Trie) Validate(text string) (bool, string) {
 			continue
 		}
 
-		if current.IsPathEnd() && left < position {
+		if current.IsPathEnd() && left <= position {
 			return false, string(runes[left : position+1])
 		}
 
@@ -172,7 +172,7 @@ func (tree *Trie) FindAll(text string) []string {
 			continue
 		}
 
-		if current.IsPathEnd() && left < position {
+		if current.IsPathEnd() && left <= position {
 			matches = append(matches, string(runes[left:position+1]))
 
 			if position == length-1 {

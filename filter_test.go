@@ -5,9 +5,13 @@ import (
 	"testing"
 )
 
+func TestLoadDict(t *testing.T) {
+	filter := New()
+	filter.LoadWordDict("./dict/dict.txt")
+}
+
 func TestSensitiveFilter(t *testing.T) {
 	filter := New()
-	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -54,7 +58,6 @@ func TestSensitiveValidateSingleword(t *testing.T) {
 
 func TestSensitiveValidate(t *testing.T) {
 	filter := New()
-	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -88,7 +91,6 @@ func TestSensitiveValidate(t *testing.T) {
 
 func TestSensitiveReplace(t *testing.T) {
 	filter := New()
-	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")
@@ -116,7 +118,6 @@ func TestSensitiveReplace(t *testing.T) {
 
 func TestSensitiveFindAll(t *testing.T) {
 	filter := New()
-	// filter.LoadWordDict("../dict/dict.txt")
 	filter.AddWord("有一个东西")
 	filter.AddWord("一个东西")
 	filter.AddWord("一个")

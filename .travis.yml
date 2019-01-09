@@ -1,5 +1,9 @@
 language: go
 
+os:
+  - linux
+  - windows
+
 go:
   - 1.8.x
   - 1.9.x

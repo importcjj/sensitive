@@ -7,7 +7,10 @@ import (
 
 func TestLoadDict(t *testing.T) {
 	filter := New()
-	filter.LoadWordDict("./dict/dict.txt")
+	err := filter.LoadWordDict("./dict/dict.txt")
+	if err != nil {
+		t.Errorf("fail to load dict %v", err)
+	}
 }
 
 func TestSensitiveFilter(t *testing.T) {

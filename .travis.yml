@@ -1,8 +1,13 @@
 language: go
 
+os:
+  - linux
+  - windows
+
 go:
   - 1.8.x
   - 1.9.x
-  - master
+  - 1.10.x
+  - 1.11.x
 
 script: go test ./...

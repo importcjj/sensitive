@@ -1,9 +1,10 @@
 package sensitive
 
 import (
-	"io/ioutil"
+	"bufio"
+	"io"
+	"os"
 	"regexp"
-	"strings"
 )
 
 // Filter 敏感词过滤器
@@ -27,13 +28,24 @@ func (filter *Filter) UpdateNoisePattern(pattern string) {
 
 // LoadWordDict 加载敏感词字典
 func (filter *Filter) LoadWordDict(path string) error {
-	content, err := ioutil.ReadFile(path)
+	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 
-	words := strings.Split(string(content), "\n")
-	filter.trie.Add(words...)
+	buf := bufio.NewReader(f)
+	for {
+		line, _, err := buf.ReadLine()
+		if err != nil {
+			if err != io.EOF {
+				return err
+			}
+			break
+		}
+		// fmt.Println(string(line))
+		filter.trie.Add(string(line))
+	}
+
 	return nil
 }
 

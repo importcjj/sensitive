@@ -46,7 +46,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 		filter.trie.Add(string(line))
 	}
 
-	return nil
+	return f.Close()
 }
 
 // AddWord 添加敏感词

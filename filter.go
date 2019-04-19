@@ -32,6 +32,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
 	buf := bufio.NewReader(f)
 	for {
@@ -46,7 +47,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 		filter.trie.Add(string(line))
 	}
 
-	return f.Close()
+	return nil
 }
 
 // AddWord 添加敏感词

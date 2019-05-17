@@ -3,8 +3,10 @@ package sensitive
 import (
 	"bufio"
 	"io"
+	"net/http"
 	"os"
 	"regexp"
+	"time"
 )
 
 // Filter 敏感词过滤器
@@ -43,7 +45,51 @@ func (filter *Filter) LoadWordDict(path string) error {
 			}
 			break
 		}
-		// fmt.Println(string(line))
+		filter.trie.Add(string(line))
+	}
+
+	return nil
+}
+
+
+// LoadNetWordDict 加载网络敏感词字典
+func (filter *Filter) LoadNetWordDict (url string) error {
+	c := http.Client{
+		Timeout: 5 * time.Second,
+	}
+	rsp, err := c.Get(url)
+	if err != nil {
+		return err
+	}
+	defer rsp.Body.Close()
+
+	buf := bufio.NewReader(rsp.Body)
+	for {
+		line, _, err := buf.ReadLine()
+		if err != nil {
+			if err != io.EOF {
+				return err
+			}
+			break
+		}
+		filter.trie.Add(string(line))
+	}
+
+	return nil
+}
+
+
+// Load, common method to add words
+func (filter *Filter) Load (rd io.Reader) error {
+	buf := bufio.NewReader(rd)
+	for {
+		line, _, err := buf.ReadLine()
+		if err != nil {
+			if err != io.EOF {
+				return err
+			}
+			break
+		}
 		filter.trie.Add(string(line))
 	}
 

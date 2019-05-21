@@ -1,7 +1,10 @@
 package sensitive
 
 import (
+	"io"
 	"reflect"
+	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -10,6 +13,31 @@ func TestLoadDict(t *testing.T) {
 	err := filter.LoadWordDict("./dict/dict.txt")
 	if err != nil {
 		t.Errorf("fail to load dict %v", err)
+	}
+}
+
+func TestLoadNetWordDict(t *testing.T) {
+	filter := New()
+	err := filter.LoadNetWordDict("https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt")
+	if err != nil {
+		t.Errorf("fail to load dict %v", err)
+	}
+	if len(filter.trie.Root.Children) == 0 {
+		t.Errorf("load dict empty")
+	}
+}
+
+
+func TestLoad(t *testing.T) {
+	filter := New()
+	var r io.Reader
+	r = strings.NewReader("read")
+	err := filter.Load(r)
+	if err != nil {
+		t.Errorf("fail to load dict %v", err)
+	}
+	if len(filter.trie.Root.Children) == 0 {
+		t.Errorf("load dict empty")
 	}
 }
 
@@ -162,4 +190,91 @@ func TestSensitiveFindallSingleword(t *testing.T) {
 		}
 	}
 
+}
+
+func TestFilter_LoadWordDict(t *testing.T) {
+	type fields struct {
+		trie  *Trie
+		noise *regexp.Regexp
+	}
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := &Filter{
+				trie:  tt.fields.trie,
+				noise: tt.fields.noise,
+			}
+			if err := filter.LoadWordDict(tt.args.path); (err != nil) != tt.wantErr {
+				t.Errorf("Filter.LoadWordDict() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestFilter_LoadNetWordDict(t *testing.T) {
+	type fields struct {
+		trie  *Trie
+		noise *regexp.Regexp
+	}
+	type args struct {
+		url string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := &Filter{
+				trie:  tt.fields.trie,
+				noise: tt.fields.noise,
+			}
+			if err := filter.LoadNetWordDict(tt.args.url); (err != nil) != tt.wantErr {
+				t.Errorf("Filter.LoadNetWordDict() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestFilter_Load(t *testing.T) {
+	type fields struct {
+		trie  *Trie
+		noise *regexp.Regexp
+	}
+	type args struct {
+		rd io.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := &Filter{
+				trie:  tt.fields.trie,
+				noise: tt.fields.noise,
+			}
+			if err := filter.Load(tt.args.rd); (err != nil) != tt.wantErr {
+				t.Errorf("Filter.Load() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

@@ -36,19 +36,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 	}
 	defer f.Close()
 
-	buf := bufio.NewReader(f)
-	for {
-		line, _, err := buf.ReadLine()
-		if err != nil {
-			if err != io.EOF {
-				return err
-			}
-			break
-		}
-		filter.trie.Add(string(line))
-	}
-
-	return nil
+	return filter.Load(f)
 }
 
 // LoadNetWordDict 加载网络敏感词字典
@@ -62,22 +50,10 @@ func (filter *Filter) LoadNetWordDict(url string) error {
 	}
 	defer rsp.Body.Close()
 
-	buf := bufio.NewReader(rsp.Body)
-	for {
-		line, _, err := buf.ReadLine()
-		if err != nil {
-			if err != io.EOF {
-				return err
-			}
-			break
-		}
-		filter.trie.Add(string(line))
-	}
-
-	return nil
+	return filter.Load(rsp.Body)
 }
 
-// Load, common method to add words
+// Load common method to add words
 func (filter *Filter) Load(rd io.Reader) error {
 	buf := bufio.NewReader(rd)
 	for {

@@ -9,5 +9,5 @@ import (
 func main() {
 	filter := sensitive.New()
 	filter.LoadWordDict("../../dict/dict.txt")
-	fmt.Println(filter.Replace("xC4x", 42))
+	fmt.Println(filter.Replace("xC4x", '*'))
 }

@@ -139,7 +139,7 @@ func TestSensitiveReplace(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		if got := filter.Replace(tc.Text, 42); got != tc.Expect {
+		if got := filter.Replace(tc.Text, '*'); got != tc.Expect {
 			t.Fatalf("replace %s, got %s, expect %s", tc.Text, got, tc.Expect)
 		}
 	}

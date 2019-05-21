@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/importcjj/sensitive"
 )
 
@@ -21,19 +22,19 @@ func main() {
 
 	fmt.Println(filter.FindAll("有一个东西东西哈哈"))
 
-	fmt.Println(filter.Replace("hello", 42))
-	fmt.Println(filter.Replace("骚", 42))
+	fmt.Println(filter.Replace("hello", '*'))
+	fmt.Println(filter.Replace("骚", '*'))
 
-	fmt.Println(filter.Replace("一", 42))
-	fmt.Println(filter.Replace("一个", 42))
-	fmt.Println(filter.Replace("一个东", 42))
-	fmt.Println(filter.Replace("一个东西", 42))
-	fmt.Println(filter.Replace("一个东西啊", 42))
-	fmt.Println(filter.Replace("有一个东西啊", 42))
-	fmt.Println(filter.Replace("有一个东啊", 42))
-	fmt.Println(filter.Replace("有一个啊", 42))
-	fmt.Println(filter.Replace("有一个", 42))
-	fmt.Println(filter.Replace("有一", 42))
+	fmt.Println(filter.Replace("一", '*'))
+	fmt.Println(filter.Replace("一个", '*'))
+	fmt.Println(filter.Replace("一个东", '*'))
+	fmt.Println(filter.Replace("一个东西", '*'))
+	fmt.Println(filter.Replace("一个东西啊", '*'))
+	fmt.Println(filter.Replace("有一个东西啊", '*'))
+	fmt.Println(filter.Replace("有一个东啊", '*'))
+	fmt.Println(filter.Replace("有一个啊", '*'))
+	fmt.Println(filter.Replace("有一个", '*'))
+	fmt.Println(filter.Replace("有一", '*'))
 
 	fmt.Println(filter.Validate("一"))
 	fmt.Println(filter.Validate("一个"))

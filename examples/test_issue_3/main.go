@@ -11,8 +11,8 @@ func keywordFilterSearch(content string) (bool, string) {
 	// filter.LoadWordDict("./conf/dict.txt")
 	code, word := filter.FindIn(content)
 	fmt.Println(content)
-	fmt.Printf("[%s]\n",word)
-	fmt.Printf("[%v]\n",code)
+	fmt.Printf("[%s]\n", word)
+	fmt.Printf("[%v]\n", code)
 	return code, word
 }
 

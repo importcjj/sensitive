@@ -20,6 +20,7 @@ import (
 func main() {
 	filter := sensitive.New()
 	filter.LoadWordDict("path/to/dict")
+	filter.LoadNetWordDict("https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt")
 	filter.AddWord("长者")
 
 	fmt.Println(filter.Filter("我为长者续一秒")) // 我为续一秒

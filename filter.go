@@ -51,9 +51,8 @@ func (filter *Filter) LoadWordDict(path string) error {
 	return nil
 }
 
-
 // LoadNetWordDict 加载网络敏感词字典
-func (filter *Filter) LoadNetWordDict (url string) error {
+func (filter *Filter) LoadNetWordDict(url string) error {
 	c := http.Client{
 		Timeout: 5 * time.Second,
 	}
@@ -78,9 +77,8 @@ func (filter *Filter) LoadNetWordDict (url string) error {
 	return nil
 }
 
-
 // Load, common method to add words
-func (filter *Filter) Load (rd io.Reader) error {
+func (filter *Filter) Load(rd io.Reader) error {
 	buf := bufio.NewReader(rd)
 	for {
 		line, _, err := buf.ReadLine()

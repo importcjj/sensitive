@@ -27,7 +27,6 @@ func TestLoadNetWordDict(t *testing.T) {
 	}
 }
 
-
 func TestLoad(t *testing.T) {
 	filter := New()
 	var r io.Reader

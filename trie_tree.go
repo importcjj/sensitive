@@ -11,6 +11,52 @@ type Node struct {
 	isPathEnd  bool
 	Character  rune
 	Children   map[rune]*Node
+	Failure    *Node
+	Parent     *Node
+	depth      int
+}
+
+// BuildFailureLinks 更新Aho-Corasick的失败表
+func (tree *Trie) BuildFailureLinks() {
+	for node := range tree.bfs() {
+		pointer := node.Parent
+		var link *Node
+		for link == nil {
+			if pointer.IsRootNode() {
+				link = pointer
+				break
+			}
+			link = pointer.Failure.Children[node.Character]
+			pointer = pointer.Failure
+
+		}
+		// fmt.Printf("%s[%d] link to %s[%d] \n", string(node.Character), node.depth, string(link.Character), link.depth)
+		node.Failure = link
+
+	}
+	// fmt.Println("finish build failure link")
+}
+
+// bfs Breadth First Search
+func (tree *Trie) bfs() <-chan *Node {
+	ch := make(chan *Node)
+	go func() {
+		queue := new(LinkList)
+		for _, child := range tree.Root.Children {
+			queue.Push(child)
+		}
+
+		for !queue.Empty() {
+			n := queue.Pop().(*Node)
+			ch <- n
+			for _, child := range n.Children {
+				queue.Push(child)
+			}
+		}
+
+		close(ch)
+	}()
+	return ch
 }
 
 // NewTrie 新建一棵Trie
@@ -36,6 +82,8 @@ func (tree *Trie) add(word string) {
 			current = next
 		} else {
 			newNode := NewNode(r)
+			newNode.depth = current.depth + 1
+			newNode.Parent = current
 			current.Children[r] = newNode
 			current = newNode
 		}
@@ -48,31 +96,20 @@ func (tree *Trie) add(word string) {
 // Replace 词语替换
 func (tree *Trie) Replace(text string, character rune) string {
 	var (
-		parent  = tree.Root
-		current *Node
-		runes   = []rune(text)
-		left    = 0
-		found   bool
+		node  = tree.Root
+		next  *Node
+		runes = []rune(text)
 	)
 
+	var ac = new(ac)
 	for position := 0; position < len(runes); position++ {
-		current, found = parent.Children[runes[position]]
-
-		if !found {
-			parent = tree.Root
-			position = left
-			left++
-			continue
+		next = ac.next(node, runes[position])
+		if next == nil {
+			next = ac.fail(node, runes[position])
 		}
 
-		// println(string(current.Character), current.IsPathEnd(), left)
-		if current.IsPathEnd() && left <= position {
-			for i := left; i <= position; i++ {
-				runes[i] = character
-			}
-		}
-
-		parent = current
+		node = next
+		ac.replace(node, runes, position, character)
 	}
 
 	return string(runes)
@@ -114,35 +151,27 @@ func (tree *Trie) Filter(text string) string {
 // Validate 验证字符串是否合法，如不合法则返回false和检测到
 // 的第一个敏感词
 func (tree *Trie) Validate(text string) (bool, string) {
-	const (
-		Empty = ""
-	)
+	const EMPTY = ""
 	var (
-		parent  = tree.Root
-		current *Node
-		runes   = []rune(text)
-		left    = 0
-		found   bool
+		node  = tree.Root
+		next  *Node
+		runes = []rune(text)
 	)
 
+	var ac = new(ac)
 	for position := 0; position < len(runes); position++ {
-		current, found = parent.Children[runes[position]]
-
-		if !found {
-			parent = tree.Root
-			position = left
-			left++
-			continue
+		next = ac.next(node, runes[position])
+		if next == nil {
+			next = ac.fail(node, runes[position])
 		}
 
-		if current.IsPathEnd() && left <= position {
-			return false, string(runes[left : position+1])
+		node = next
+		if first := ac.firstOutput(node, runes, position); len(first) > 0 {
+			return false, first
 		}
-
-		parent = current
 	}
 
-	return true, Empty
+	return true, EMPTY
 }
 
 // FindIn 判断text中是否含有词库中的词
@@ -153,56 +182,25 @@ func (tree *Trie) FindIn(text string) (bool, string) {
 
 // FindAll 找有所有包含在词库中的词
 func (tree *Trie) FindAll(text string) []string {
-	var matches []string
 	var (
-		parent  = tree.Root
-		current *Node
-		runes   = []rune(text)
-		length  = len(runes)
-		left    = 0
-		found   bool
+		node  = tree.Root
+		next  *Node
+		runes = []rune(text)
 	)
 
-	for position := 0; position < length; position++ {
-		current, found = parent.Children[runes[position]]
-
-		if !found {
-			parent = tree.Root
-			position = left
-			left++
-			continue
+	var ac = new(ac)
+	for position := 0; position < len(runes); position++ {
+		next = ac.next(node, runes[position])
+		if next == nil {
+			next = ac.fail(node, runes[position])
 		}
 
-		if current.IsPathEnd() && left <= position {
-			matches = append(matches, string(runes[left:position+1]))
-
-			if position == length-1 {
-				parent = tree.Root
-				position = left
-				left++
-				continue
-			}
-		}
-
-		parent = current
+		node = next
+		ac.output(node, runes, position)
 	}
 
-	if count := len(matches); count > 0 {
-		set := make(map[string]struct{})
-		for i := range matches {
-			_, ok := set[matches[i]]
-			if !ok {
-				set[matches[i]] = struct{}{}
-				continue
-			}
-			count--
-			copy(matches[i:], matches[i+1:])
-			i--
-		}
-		return matches[:count]
-	}
+	return ac.results
 
-	return nil
 }
 
 // NewNode 新建子节点
@@ -215,11 +213,16 @@ func NewNode(character rune) *Node {
 
 // NewRootNode 新建根节点
 func NewRootNode(character rune) *Node {
-	return &Node{
+	root := &Node{
 		isRootNode: true,
 		Character:  character,
 		Children:   make(map[rune]*Node, 0),
+		depth:      0,
 	}
+
+	root.Failure = root
+
+	return root
 }
 
 // IsLeafNode 判断是否叶子节点

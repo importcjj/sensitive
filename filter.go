@@ -11,8 +11,10 @@ import (
 
 // Filter 敏感词过滤器
 type Filter struct {
-	trie  *Trie
-	noise *regexp.Regexp
+	trie       *Trie
+	noise      *regexp.Regexp
+	buildVer   int64
+	updatedVer int64
 }
 
 // New 返回一个敏感词过滤器
@@ -64,40 +66,54 @@ func (filter *Filter) Load(rd io.Reader) error {
 			}
 			break
 		}
-		filter.trie.Add(string(line))
+		filter.AddWord(string(line))
 	}
 
 	return nil
 }
 
+func (filter *Filter) updateFailureLink() {
+	if filter.buildVer != filter.updatedVer {
+		// fmt.Println("update failure link")
+		filter.trie.BuildFailureLinks()
+		filter.buildVer = filter.updatedVer
+	}
+}
+
 // AddWord 添加敏感词
 func (filter *Filter) AddWord(words ...string) {
 	filter.trie.Add(words...)
+	filter.updatedVer = time.Now().UnixNano()
 }
 
 // Filter 过滤敏感词
 func (filter *Filter) Filter(text string) string {
+	filter.updateFailureLink()
 	return filter.trie.Filter(text)
 }
 
 // Replace 和谐敏感词
 func (filter *Filter) Replace(text string, repl rune) string {
+	filter.updateFailureLink()
 	return filter.trie.Replace(text, repl)
 }
 
 // FindIn 检测敏感词
 func (filter *Filter) FindIn(text string) (bool, string) {
+	filter.updateFailureLink()
 	text = filter.RemoveNoise(text)
 	return filter.trie.FindIn(text)
 }
 
 // FindAll 找到所有匹配词
 func (filter *Filter) FindAll(text string) []string {
+	filter.updateFailureLink()
 	return filter.trie.FindAll(text)
 }
 
 // Validate 检测字符串是否合法
 func (filter *Filter) Validate(text string) (bool, string) {
+	filter.updateFailureLink()
 	text = filter.RemoveNoise(text)
 	return filter.trie.Validate(text)
 }

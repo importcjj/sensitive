@@ -16,6 +16,15 @@ func TestLoadDict(t *testing.T) {
 	}
 }
 
+func listToMap(items []string) map[string]struct{} {
+	m := make(map[string]struct{})
+	for _, item := range items {
+		m[item] = struct{}{}
+	}
+
+	return m
+}
+
 func TestLoadNetWordDict(t *testing.T) {
 	filter := New()
 	err := filter.LoadNetWordDict("https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt")
@@ -105,7 +114,7 @@ func TestSensitiveValidate(t *testing.T) {
 	}{
 		{"我有一@ |个东东西", false, "一个"},
 		{"我有一个东东西", false, "一个"},
-		{"我有一个东西", false, "有一个东西"},
+		{"我有一个东西", false, "一个"},
 		{"一个东西", false, "一个"},
 		{"两个东西", false, "个东"},
 		{"一样东西", false, "东西"},
@@ -113,7 +122,7 @@ func TestSensitiveValidate(t *testing.T) {
 
 	for _, tc := range testcases {
 		if pass, first := filter.Validate(tc.Text); pass != tc.ExpectPass || first != tc.ExpectFirst {
-			t.Fatalf("validate %s, got %v, %s, expect %v, %s", tc.Text, pass, first, tc.ExpectPass, tc.ExpectFirst)
+			t.Errorf("validate %s, got %v, %s, expect %v, %s", tc.Text, pass, first, tc.ExpectPass, tc.ExpectFirst)
 		}
 	}
 
@@ -131,10 +140,10 @@ func TestSensitiveReplace(t *testing.T) {
 		Text   string
 		Expect string
 	}{
-		{"我有一个东东西", "我有**东**"},
+		{"我有一个东东西", "我有*****"},
 		{"我有一个东西", "我*****"},
 		{"一个东西", "****"},
-		{"两个东西", "两**西"},
+		{"两个东西", "两***"},
 		{"一个物体", "**物体"},
 	}
 
@@ -166,8 +175,8 @@ func TestSensitiveFindAll(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(tc.Expect, got) {
-			t.Fatalf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
+		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(listToMap(tc.Expect), listToMap(got)) {
+			t.Errorf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
 		}
 	}
 }
@@ -184,7 +193,7 @@ func TestSensitiveFindallSingleword(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(tc.Expect, got) {
+		if got := filter.FindAll(tc.Text); !reflect.DeepEqual(listToMap(tc.Expect), listToMap(got)) {
 			t.Fatalf("findall %s, got %s, expect %s", tc.Text, got, tc.Expect)
 		}
 	}

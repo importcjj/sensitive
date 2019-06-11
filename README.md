@@ -6,6 +6,7 @@
 
 #
 
+新增分支[Aho-Corasick](https://github.com/importcjj/sensitive/tree/Aho-Corasick)以支持AC自动机
 
 Usage:
 

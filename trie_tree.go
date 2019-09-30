@@ -45,12 +45,36 @@ func (tree *Trie) add(word string) {
 	}
 }
 
+func (tree *Trie) Del(words ...string) {
+	for _, word := range words {
+		tree.del(word)
+	}
+}
+
+func (tree *Trie) del(word string) {
+	var current = tree.Root
+	var runes = []rune(word)
+	for position := 0; position < len(runes); position++ {
+		r := runes[position]
+		if next, ok := current.Children[r]; !ok {
+			return
+		} else {
+			current = next
+		}
+
+		if position == len(runes)-1 {
+			current.SoftDel()
+		}
+	}
+}
+
 // Replace 词语替换
 func (tree *Trie) Replace(text string, character rune) string {
 	var (
 		parent  = tree.Root
 		current *Node
 		runes   = []rune(text)
+		length  = len(runes)
 		left    = 0
 		found   bool
 	)
@@ -58,7 +82,7 @@ func (tree *Trie) Replace(text string, character rune) string {
 	for position := 0; position < len(runes); position++ {
 		current, found = parent.Children[runes[position]]
 
-		if !found {
+		if !found || (!current.IsPathEnd() && position == length-1) {
 			parent = tree.Root
 			position = left
 			left++
@@ -93,7 +117,7 @@ func (tree *Trie) Filter(text string) string {
 	for position := 0; position < length; position++ {
 		current, found = parent.Children[runes[position]]
 
-		if !found {
+		if !found || (!current.IsPathEnd() && position == length-1) {
 			resultRunes = append(resultRunes, runes[left])
 			parent = tree.Root
 			position = left
@@ -103,8 +127,11 @@ func (tree *Trie) Filter(text string) string {
 
 		if current.IsPathEnd() {
 			left = position + 1
+			parent = tree.Root
+		} else {
+			parent = current
 		}
-		parent = current
+
 	}
 
 	resultRunes = append(resultRunes, runes[left:]...)
@@ -121,6 +148,7 @@ func (tree *Trie) Validate(text string) (bool, string) {
 		parent  = tree.Root
 		current *Node
 		runes   = []rune(text)
+		length  = len(runes)
 		left    = 0
 		found   bool
 	)
@@ -128,7 +156,7 @@ func (tree *Trie) Validate(text string) (bool, string) {
 	for position := 0; position < len(runes); position++ {
 		current, found = parent.Children[runes[position]]
 
-		if !found {
+		if !found || (!current.IsPathEnd() && position == length-1) {
 			parent = tree.Root
 			position = left
 			left++
@@ -175,13 +203,13 @@ func (tree *Trie) FindAll(text string) []string {
 
 		if current.IsPathEnd() && left <= position {
 			matches = append(matches, string(runes[left:position+1]))
+		}
 
-			if position == length-1 {
-				parent = tree.Root
-				position = left
-				left++
-				continue
-			}
+		if position == length-1 {
+			parent = tree.Root
+			position = left
+			left++
+			continue
 		}
 
 		parent = current
@@ -235,4 +263,9 @@ func (node *Node) IsRootNode() bool {
 // IsPathEnd 判断是否为某个路径的结束
 func (node *Node) IsPathEnd() bool {
 	return node.isPathEnd
+}
+
+// SoftDel 置软删除状态
+func (node *Node) SoftDel() {
+	node.isPathEnd = false
 }

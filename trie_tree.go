@@ -217,17 +217,17 @@ func (tree *Trie) FindAll(text string) []string {
 
 	if count := len(matches); count > 0 {
 		set := make(map[string]struct{})
-		for i := range matches {
-			_, ok := set[matches[i]]
-			if !ok {
+		for i := 0; i < len(matches); i++ {
+			if _, ok := set[matches[i]]; !ok {
 				set[matches[i]] = struct{}{}
 				continue
 			}
-			count--
-			copy(matches[i:], matches[i+1:])
-			i--
 		}
-		return matches[:count]
+		matches = make([]string, 0, len(set))
+		for word := range set {
+			matches = append(matches, word)
+		}
+		return matches
 	}
 
 	return nil

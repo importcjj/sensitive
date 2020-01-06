@@ -381,3 +381,16 @@ func TestFilter_Load(t *testing.T) {
 		})
 	}
 }
+
+func TestIssue13(t *testing.T) {
+	filter := New()
+	filter.AddWord("words")
+	filter.AddWord("警察局")
+
+	r := filter.FindAll("words words words kill myself myself suicide警察局kill my self")
+	expected := []string{"words", "警察局"}
+
+	if !reflect.DeepEqual(r, expected) {
+		t.Errorf("%v expected, got %v", expected, r)
+	}
+}

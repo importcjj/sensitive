@@ -145,29 +145,24 @@ func (tree *Trie) Validate(text string) (bool, string) {
 		Empty = ""
 	)
 	var (
-		parent  = tree.Root
-		current *Node
-		runes   = []rune(text)
-		length  = len(runes)
-		left    = 0
-		found   bool
+		runes = []rune(text)
 	)
 
-	for position := 0; position < len(runes); position++ {
-		current, found = parent.Children[runes[position]]
+	for left := 0; left < len(runes); left++ {
+		parent := tree.Root
+		for position := left; position < len(runes); position++ {
+			current, found := parent.Children[runes[position]]
 
-		if !found || (!current.IsPathEnd() && position == length-1) {
-			parent = tree.Root
-			position = left
-			left++
-			continue
+			if !found {
+				break
+			}
+
+			if current.IsPathEnd() {
+				return false, string(runes[left : position+1])
+			}
+
+			parent = current
 		}
-
-		if current.IsPathEnd() && left <= position {
-			return false, string(runes[left : position+1])
-		}
-
-		parent = current
 	}
 
 	return true, Empty

@@ -30,8 +30,7 @@ func (tree *Trie) Add(words ...string) {
 func (tree *Trie) add(word string) {
 	var current = tree.Root
 	var runes = []rune(word)
-	for position := 0; position < len(runes); position++ {
-		r := runes[position]
+	for _, r := range runes {
 		if next, ok := current.Children[r]; ok {
 			current = next
 		} else {
@@ -39,10 +38,9 @@ func (tree *Trie) add(word string) {
 			current.Children[r] = newNode
 			current = newNode
 		}
-		if position == len(runes)-1 {
-			current.isPathEnd = true
-		}
 	}
+
+	current.isPathEnd = true
 }
 
 func (tree *Trie) Del(words ...string) {

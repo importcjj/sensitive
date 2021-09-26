@@ -111,3 +111,8 @@ func (filter *Filter) Validate(text string) (bool, string) {
 func (filter *Filter) RemoveNoise(text string) string {
 	return filter.noise.ReplaceAllString(text, "")
 }
+
+func (filter *Filter) ValidateWithWildcard(text string, wildcard rune) (bool, string) {
+	text = filter.RemoveNoise(text)
+	return filter.trie.ValidateWithWildcard(text, wildcard)
+}

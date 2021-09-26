@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/importcjj/sensitive"
+	"sensitive"
 )
 
 func main() {

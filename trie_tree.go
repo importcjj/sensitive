@@ -173,6 +173,51 @@ func (tree *Trie) Validate(text string) (bool, string) {
 	return true, Empty
 }
 
+func (tree *Trie) ValidateWithWildcard(text string, wildcard rune) (bool, string) {
+
+	runes := []rune(text)
+	parent := tree.Root
+	patter := ""
+
+	return tree.dfs(runes, parent, 0, wildcard, "", &patter), patter
+
+}
+
+func (tree *Trie) dfs(runes []rune, parent *Node, curl int, wildcard rune, str string, patter *string) bool {
+	if parent == nil {
+		return false
+	}
+	if parent.IsPathEnd() {
+		*patter = str
+		return true
+	}
+	if curl >= len(runes) {
+		return false
+	}
+
+	if current, found := parent.Children[runes[curl]]; found {
+		if is1 := tree.dfs(runes, current, curl+1, wildcard, str+string(runes[curl]), patter); is1 {
+			return true
+		}
+	}
+
+	// 先看有没有*
+	if current1, found1 := parent.Children[wildcard]; found1 {
+
+		if is2 := tree.dfs(runes, current1, curl+1, wildcard, str+string(wildcard), patter); is2 {
+			return true
+		}
+
+		if current2, found2 := current1.Children[runes[curl]]; found2 {
+			if is3 := tree.dfs(runes, current2, curl+1, wildcard, str+string(wildcard)+string(runes[curl]), patter); is3 {
+				return true
+			}
+		}
+	}
+
+	return tree.dfs(runes, tree.Root, curl+1, wildcard, str, patter)
+}
+
 // FindIn 判断text中是否含有词库中的词
 func (tree *Trie) FindIn(text string) (bool, string) {
 	validated, first := tree.Validate(text)

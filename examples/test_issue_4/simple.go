@@ -11,4 +11,5 @@ func main() {
 	fmt.Println(filter.ValidateWithWildcard("刘一上三台啊", '*'))
 	fmt.Println(filter.ValidateWithWildcard("哈哈哈刘一上三", '*'))
 	fmt.Println(filter.ValidateWithWildcard("哈哈哈刘一上三台", '*'))
+	fmt.Println(filter.ValidateWithWildcard("哈哈哈刘一上三台，你是个小白鼠", '*'))
 }

@@ -176,14 +176,20 @@ func (tree *Trie) Validate(text string) (bool, string) {
 func (tree *Trie) ValidateWithWildcard(text string, wildcard rune) (bool, string) {
 
 	runes := []rune(text)
-	parent := tree.Root
-	patter := ""
 
-	return tree.dfs(runes, parent, 0, wildcard, "", &patter), patter
+	for curl := 0; curl < len(runes); curl++ {
 
+		patter := ""
+		parent := tree.Root
+		if tree.dfs(runes, parent, curl, wildcard, "", &patter) {
+			return false, patter
+		}
+	}
+	return true, ""
 }
 
 func (tree *Trie) dfs(runes []rune, parent *Node, curl int, wildcard rune, str string, patter *string) bool {
+
 	if parent == nil {
 		return false
 	}
@@ -195,6 +201,7 @@ func (tree *Trie) dfs(runes []rune, parent *Node, curl int, wildcard rune, str s
 		return false
 	}
 
+	// 匹配到了
 	if current, found := parent.Children[runes[curl]]; found {
 		if is1 := tree.dfs(runes, current, curl+1, wildcard, str+string(runes[curl]), patter); is1 {
 			return true
@@ -214,8 +221,8 @@ func (tree *Trie) dfs(runes []rune, parent *Node, curl int, wildcard rune, str s
 			}
 		}
 	}
+	return false
 
-	return tree.dfs(runes, tree.Root, curl+1, wildcard, str, patter)
 }
 
 // FindIn 判断text中是否含有词库中的词

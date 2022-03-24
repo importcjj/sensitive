@@ -2,10 +2,12 @@ package sensitive
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -40,7 +42,7 @@ func (filter *Filter) LoadWordDict(path string) error {
 }
 
 // LoadNetWordDict 加载网络敏感词字典
-func (filter *Filter) LoadNetWordDict(url string) error {
+func (filter *Filter) LoadNetWordDict(url string, allowHtml bool) error {
 	c := http.Client{
 		Timeout: 5 * time.Second,
 	}
@@ -50,6 +52,15 @@ func (filter *Filter) LoadNetWordDict(url string) error {
 	}
 	defer rsp.Body.Close()
 
+	if rsp.StatusCode >= 400 {
+		text := http.StatusText(rsp.StatusCode)
+		return fmt.Errorf(text)
+	} else if allowHtml == false {
+		value := strings.ToLower(rsp.Header.Get("Content-Type"))
+		if strings.Contains(value, "html") {
+			return fmt.Errorf("html is not allowed.")
+		}
+	}
 	return filter.Load(rsp.Body)
 }
 

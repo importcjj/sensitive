@@ -85,7 +85,8 @@ filter.FindAll("这篇文章真的好垃圾")
 
 ```go
 dictUrl := "https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt"
-filter.LoadNetWordDict(dictUrl, true)
+// filter.LoadNetWordDictTimeout(dictUrl, false, 5000)
+filter.LoadNetWordDict(dictUrl)
 ```
 
 #### UpdateNoisePattern

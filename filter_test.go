@@ -18,7 +18,7 @@ func TestLoadDict(t *testing.T) {
 
 func TestLoadNetWordDict(t *testing.T) {
 	filter, dictUrl := New(), "https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt"
-	err := filter.LoadNetWordDict(dictUrl, true)
+	err := filter.LoadNetWordDict(dictUrl)
 	if err != nil {
 		t.Errorf("fail to load dict %v", err)
 	}
@@ -346,7 +346,7 @@ func TestFilter_LoadNetWordDict(t *testing.T) {
 				trie:  tt.fields.trie,
 				noise: tt.fields.noise,
 			}
-			if err := filter.LoadNetWordDict(tt.args.url, true); (err != nil) != tt.wantErr {
+			if err := filter.LoadNetWordDict(tt.args.url); (err != nil) != tt.wantErr {
 				t.Errorf("Filter.LoadNetWordDict() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -13,14 +13,14 @@ import (
 
 // Filter 敏感词过滤器
 type Filter struct {
-	trie  *Trie
 	noise *regexp.Regexp
+	*Trie
 }
 
 // New 返回一个敏感词过滤器
 func New() *Filter {
 	return &Filter{
-		trie:  NewTrie(),
+		Trie:  NewTrie(),
 		noise: regexp.MustCompile(`[\|\s&%$@*]+`),
 	}
 }
@@ -42,9 +42,14 @@ func (filter *Filter) LoadWordDict(path string) error {
 }
 
 // LoadNetWordDict 加载网络敏感词字典
-func (filter *Filter) LoadNetWordDict(url string, allowHtml bool) error {
+func (filter *Filter) LoadNetWordDict(url string) error {
+	return filter.LoadNetWordDictTimeout(url, false, 5000)
+}
+
+// LoadNetWordDictTimeout 加载网络敏感词字典，带超时设置
+func (filter *Filter) LoadNetWordDictTimeout(url string, allowHtml bool, timeout int) error {
 	c := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: time.Duration(timeout) * time.Millisecond,
 	}
 	rsp, err := c.Get(url)
 	if err != nil {
@@ -75,7 +80,7 @@ func (filter *Filter) Load(rd io.Reader) error {
 			}
 			break
 		}
-		filter.trie.Add(string(line))
+		filter.Trie.Add(string(line))
 	}
 
 	return nil
@@ -83,42 +88,48 @@ func (filter *Filter) Load(rd io.Reader) error {
 
 // AddWord 添加敏感词
 func (filter *Filter) AddWord(words ...string) {
-	filter.trie.Add(words...)
+	filter.Trie.Add(words...)
 }
 
 // DelWord 删除敏感词
 func (filter *Filter) DelWord(words ...string) {
-	filter.trie.Del(words...)
+	filter.Trie.Del(words...)
 }
 
 // Filter 过滤敏感词
 func (filter *Filter) Filter(text string) string {
-	return filter.trie.Filter(text)
+	text = filter.RemoveNoise(text)
+	return filter.Trie.Filter(text)
 }
 
 // Replace 和谐敏感词
 func (filter *Filter) Replace(text string, repl rune) string {
-	return filter.trie.Replace(text, repl)
+	text = filter.RemoveNoise(text)
+	return filter.Trie.Replace(text, repl)
 }
 
 // FindIn 检测敏感词
 func (filter *Filter) FindIn(text string) (bool, string) {
 	text = filter.RemoveNoise(text)
-	return filter.trie.FindIn(text)
+	return filter.Trie.FindIn(text)
 }
 
 // FindAll 找到所有匹配词
 func (filter *Filter) FindAll(text string) []string {
-	return filter.trie.FindAll(text)
+	text = filter.RemoveNoise(text)
+	return filter.Trie.FindAll(text)
 }
 
 // Validate 检测字符串是否合法
 func (filter *Filter) Validate(text string) (bool, string) {
 	text = filter.RemoveNoise(text)
-	return filter.trie.Validate(text)
+	return filter.Trie.Validate(text)
 }
 
 // RemoveNoise 去除空格等噪音
 func (filter *Filter) RemoveNoise(text string) string {
+	if filter.noise.String() == "" { //空模式
+		return text
+	}
 	return filter.noise.ReplaceAllString(text, "")
 }

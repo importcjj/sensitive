@@ -84,7 +84,9 @@ filter.FindAll("这篇文章真的好垃圾")
 加载网络词库。
 
 ```go
-filter.LoadNetWordDict("https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt")
+dictUrl := "https://raw.githubusercontent.com/importcjj/sensitive/master/dict/dict.txt"
+// filter.LoadNetWordDictTimeout(dictUrl, false, 5000)
+filter.LoadNetWordDict(dictUrl)
 ```
 
 #### UpdateNoisePattern
